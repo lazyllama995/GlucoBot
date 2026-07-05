@@ -2,7 +2,15 @@ import { brand } from "../../core/brand.js";
 import { normalizeCarbVisionEstimate } from "../../core/carbVision.js";
 import { calculatorOptions, calculateCorrectionDose } from "../../core/doseCalculator.js";
 import { createLogEntry, logTypes } from "../../core/events.js";
-import { loadLogs, loadSettings, prepareCalculatorLogStorage, saveLogs, saveSettings } from "./storage.js";
+import {
+  loadDatabaseLogs,
+  loadLogs,
+  loadSettings,
+  prepareCalculatorLogStorage,
+  saveDatabaseLogs,
+  saveLogs,
+  saveSettings
+} from "./storage.js";
 
 const app = document.querySelector("#app");
 prepareCalculatorLogStorage();
@@ -27,9 +35,14 @@ let carbVision = {
   status: "idle",
   error: ""
 };
+let logbookStorage = {
+  mode: "device",
+  message: "Saved on this device"
+};
 
 saveLogs(logs);
 render();
+hydrateLogsFromDatabase();
 
 function render() {
   app.innerHTML = `
@@ -211,6 +224,9 @@ function renderLogTab() {
           <button type="button" id="ai-suggest-button">AI Suggest</button>
         </div>
       </div>
+      <div class="storage-status ${logbookStorage.mode === "database" ? "synced" : ""}">
+        ${logbookStorage.message}
+      </div>
       ${renderAiSuggestions()}
       ${
         logs.length
@@ -384,7 +400,7 @@ function bindEvents() {
       }),
       ...logs
     ];
-    saveLogs(logs);
+    persistLogs();
     annotationNote = "";
     activeTab = "log";
     render();
@@ -402,7 +418,7 @@ function bindEvents() {
   document.querySelector("#reset-log-button")?.addEventListener("click", () => {
     logs = [];
     aiSuggestions = [];
-    saveLogs(logs);
+    persistLogs();
     render();
   });
 
@@ -452,6 +468,48 @@ function handleCarbVisionImageSelection(event) {
       render();
     });
     reader.readAsDataURL(file);
+}
+
+async function hydrateLogsFromDatabase() {
+  try {
+    const databaseLogs = (await loadDatabaseLogs()).filter((log) => log.type === logTypes.dose);
+    if (databaseLogs.length) {
+      logs = databaseLogs;
+      saveLogs(logs);
+    } else if (logs.length) {
+      await saveDatabaseLogs(logs);
+    }
+    logbookStorage = {
+      mode: "database",
+      message: "Saved in GlucoBot database"
+    };
+    render();
+  } catch {
+    logbookStorage = {
+      mode: "device",
+      message: "Saved on this device"
+    };
+    render();
+  }
+}
+
+function persistLogs() {
+  saveLogs(logs);
+  saveDatabaseLogs(logs)
+    .then(() => {
+      logbookStorage = {
+        mode: "database",
+        message: "Saved in GlucoBot database"
+      };
+      if (activeTab === "log") render();
+    })
+    .catch(() => {
+      logbookStorage = {
+        mode: "device",
+        message: "Saved on this device"
+      };
+      if (activeTab === "log") render();
+    });
 }
 
 function updateDoseFromForm(formElement, { resetManualDose } = { resetManualDose: true }) {

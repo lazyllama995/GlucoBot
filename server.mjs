@@ -2,11 +2,15 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
+import pg from "pg";
 import { normalizeCarbVisionEstimate } from "./src/core/carbVision.js";
 
+const { Pool } = pg;
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 const port = Number(process.env.PORT ?? 4173);
 const maxBodyBytes = 8 * 1024 * 1024;
+let databasePool;
+let schemaReady;
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
@@ -18,8 +22,15 @@ const mimeTypes = {
 
 const server = createServer(async (request, response) => {
   try {
-    if (request.method === "POST" && request.url === "/api/carb-vision") {
+    const url = new URL(request.url, `http://${request.headers.host}`);
+
+    if (request.method === "POST" && url.pathname === "/api/carb-vision") {
       await handleCarbVision(request, response);
+      return;
+    }
+
+    if (url.pathname === "/api/logs") {
+      await handleLogs(request, response);
       return;
     }
 
@@ -58,6 +69,46 @@ async function handleCarbVision(request, response) {
 
   const estimate = await estimateCarbsWithOpenAI(imageDataUrl);
   sendJson(response, 200, { estimate });
+}
+
+async function handleLogs(request, response) {
+  const pool = getDatabasePool();
+  if (!pool) {
+    sendJson(response, 503, { error: "Database is not configured. Logbook is saved on this device." });
+    return;
+  }
+
+  await ensureLogSchema(pool);
+  const clientId = getClientId(request);
+
+  if (request.method === "GET") {
+    const result = await pool.query(
+      `select id, type, payload, created_at
+       from glucobot_logs
+       where client_id = $1
+       order by created_at desc`,
+      [clientId]
+    );
+    sendJson(response, 200, {
+      logs: result.rows.map((row) => ({
+        id: row.id,
+        type: row.type,
+        payload: row.payload,
+        createdAt: new Date(row.created_at).toISOString()
+      }))
+    });
+    return;
+  }
+
+  if (request.method === "PUT") {
+    const body = await readJsonBody(request);
+    const logs = Array.isArray(body.logs) ? body.logs : [];
+    await replaceLogs(pool, clientId, logs);
+    sendJson(response, 200, { saved: logs.length });
+    return;
+  }
+
+  sendJson(response, 405, { error: "Method not allowed" });
 }
 
 async function estimateCarbsWithOpenAI(imageDataUrl) {
@@ -163,6 +214,67 @@ async function serveStatic(request, response) {
     if (request.method !== "HEAD") response.end(index);
     else response.end();
   }
+}
+
+function getDatabasePool() {
+  if (!process.env.DATABASE_URL) return null;
+  if (databasePool) return databasePool;
+
+  const isLocalDatabase = process.env.DATABASE_URL.includes("localhost");
+  databasePool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: isLocalDatabase ? false : { rejectUnauthorized: false }
+  });
+  return databasePool;
+}
+
+async function ensureLogSchema(pool) {
+  if (!schemaReady) {
+    schemaReady = pool.query(`
+      create table if not exists glucobot_logs (
+        id text primary key,
+        client_id text not null,
+        type text not null,
+        payload jsonb not null,
+        created_at timestamptz not null
+      );
+      create index if not exists glucobot_logs_client_created_idx
+      on glucobot_logs (client_id, created_at desc);
+    `);
+  }
+
+  await schemaReady;
+}
+
+async function replaceLogs(pool, clientId, logs) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("begin");
+    await client.query("delete from glucobot_logs where client_id = $1", [clientId]);
+
+    for (const log of logs) {
+      if (!log?.id || !log?.type || !log?.createdAt) continue;
+      await client.query(
+        `insert into glucobot_logs (id, client_id, type, payload, created_at)
+         values ($1, $2, $3, $4::jsonb, $5)`,
+        [String(log.id), clientId, String(log.type), JSON.stringify(log.payload ?? {}), log.createdAt]
+      );
+    }
+
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+function getClientId(request) {
+  const rawClientId = request.headers["x-glucobot-client-id"];
+  const clientId = Array.isArray(rawClientId) ? rawClientId[0] : rawClientId;
+  return String(clientId || "anonymous").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80) || "anonymous";
 }
 
 function readJsonBody(request) {

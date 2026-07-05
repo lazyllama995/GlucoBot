@@ -29,7 +29,9 @@ This project includes `render.yaml` for a permanent Render web service.
 1. Push this repository to GitHub.
 2. In Render, create a new Blueprint from the repository.
 3. Add `OPENAI_API_KEY` as an environment variable.
-4. Deploy the `glucobot` service.
+4. Deploy the `glucobot` service and the `glucobot-db` Postgres database.
+
+The Logbook syncs to Postgres through `DATABASE_URL`. If `DATABASE_URL` is not configured yet, Logbook data falls back to browser `localStorage`.
 
 ## Architecture
 

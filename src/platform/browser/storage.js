@@ -2,6 +2,7 @@ import { brand } from "../../core/brand.js";
 import { defaultRatioSettings, mergeRatioSettings } from "../../core/doseCalculator.js";
 
 const keys = {
+  clientId: `${brand.databasePrefix}client_id`,
   logs: `${brand.databasePrefix}logs`,
   settings: `${brand.databasePrefix}settings`,
   dataMode: `${brand.databasePrefix}data_mode`
@@ -23,6 +24,45 @@ export function prepareCalculatorLogStorage() {
 
 export function saveLogs(logs) {
   localStorage.setItem(keys.logs, JSON.stringify(logs));
+}
+
+export function getClientId() {
+  const existing = localStorage.getItem(keys.clientId);
+  if (existing) return existing;
+
+  const clientId =
+    globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+  localStorage.setItem(keys.clientId, clientId);
+  return clientId;
+}
+
+export async function loadDatabaseLogs() {
+  const response = await fetch("/api/logs", {
+    headers: {
+      "x-glucobot-client-id": getClientId()
+    }
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error || "Database logs are unavailable.");
+  }
+  return Array.isArray(payload.logs) ? payload.logs : [];
+}
+
+export async function saveDatabaseLogs(logs) {
+  const response = await fetch("/api/logs", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "x-glucobot-client-id": getClientId()
+    },
+    body: JSON.stringify({ logs })
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error || "Database logs could not be saved.");
+  }
+  return payload;
 }
 
 export function loadSettings() {
