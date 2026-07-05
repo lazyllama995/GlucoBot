@@ -1,16 +1,19 @@
 :root {
-  --primary: #0f3d75;
-  --primary-dark: #08233f;
-  --secondary: #22d3ee;
-  --warning: #f59e0b;
-  --danger: #dc2626;
-  --success: #16a34a;
-  --ink: #102033;
-  --muted: #62748a;
-  --line: #d9e3ec;
-  --surface: #ffffff;
-  --wash: #f4f8fb;
-  --shadow: 0 16px 40px rgba(15, 61, 117, 0.12);
+  --primary: #3f3f46;
+  --primary-dark: #18181b;
+  --secondary: #a1a1aa;
+  --warning: #d6a64a;
+  --danger: #ef4444;
+  --success: #737373;
+  --ink: #f4f4f5;
+  --muted: #a1a1aa;
+  --line: #2f2f35;
+  --surface: #18181b;
+  --wash: #0c0c0d;
+  --surface-soft: #111113;
+  --surface-raised: #202024;
+  --field: #151518;
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--ink);
   background: var(--wash);
@@ -28,6 +31,8 @@ body {
   margin: 0;
   min-width: 320px;
   overflow-x: hidden;
+  color: var(--ink);
+  background: var(--wash);
 }
 
 a {
@@ -989,6 +994,233 @@ select:focus {
 .mini-list span {
   color: var(--muted);
   text-align: right;
+}
+
+.navbar,
+.app-tabs,
+.panel,
+.dose-calculator,
+.calculator-section,
+.calc-field,
+.ratios-shell,
+.ratio-section,
+.annotation-field textarea,
+.log-shell,
+.log-entry,
+.vision-shell,
+.vision-preview-panel,
+.vision-placeholder,
+.vision-breakdown,
+.vision-message,
+.empty-log {
+  background: var(--surface);
+}
+
+.navbar {
+  border-bottom-color: var(--line);
+  background: rgba(18, 18, 20, 0.92);
+}
+
+.app-tabs,
+.panel,
+.dose-calculator,
+.calculator-section,
+.calc-field,
+.ratios-shell,
+.ratio-section,
+.log-shell,
+.log-entry,
+.vision-shell,
+.vision-preview-panel,
+.vision-breakdown,
+.vision-message,
+.empty-log,
+.annotation-field textarea,
+input,
+select,
+textarea {
+  border-color: var(--line);
+}
+
+.app-tabs,
+.panel,
+.dose-calculator,
+.ratios-shell,
+.log-shell,
+.vision-shell {
+  box-shadow: var(--shadow);
+}
+
+.tab-button {
+  color: var(--muted);
+}
+
+.tab-button:hover {
+  color: var(--ink);
+  background: var(--surface-raised);
+}
+
+.tab-button.active,
+button,
+.camera-action {
+  color: #ffffff;
+  background: #3f3f46;
+}
+
+.tab-button.active {
+  background: #27272a;
+}
+
+button:hover,
+.camera-action:hover,
+.file-action:hover {
+  background: #52525b;
+}
+
+button:disabled,
+button:disabled:hover {
+  color: #71717a;
+  background: #27272a;
+}
+
+h1,
+h2,
+h3,
+.brand-lockup strong,
+.empty-log strong,
+.vision-placeholder strong,
+.dose-result strong,
+.log-entry-header strong,
+.vision-breakdown li strong,
+.calc-field input,
+.calc-field select,
+.ratio-section h3 {
+  color: var(--ink);
+}
+
+label,
+.log-entry p,
+.log-metrics span,
+.vision-breakdown li span {
+  color: #d4d4d8;
+}
+
+input,
+select,
+textarea,
+.calc-field input,
+.calc-field select {
+  color: var(--ink);
+  background: var(--field);
+}
+
+.calc-field,
+.annotation-field textarea,
+.vision-breakdown,
+.vision-message,
+.log-entry {
+  background: var(--field);
+}
+
+.calc-field input,
+.calc-field select {
+  border-bottom-color: #3f3f46;
+}
+
+.calc-field input,
+.calc-field select,
+.dose-edit input {
+  border-color: transparent;
+  border-bottom-color: #3f3f46;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.calc-field input:focus,
+.calc-field select:focus {
+  outline-color: rgba(161, 161, 170, 0.24);
+  border-color: #71717a;
+}
+
+.dose-summary,
+.vision-result {
+  border-color: #3f3f46;
+  background: #111113;
+}
+
+.dose-summary > strong {
+  background: #27272a;
+}
+
+.secondary-action,
+.calculator-actions .secondary-action,
+.file-action {
+  color: var(--ink);
+  border-color: #3f3f46;
+  background: #202024;
+}
+
+.secondary-action:hover,
+.calculator-actions .secondary-action:hover {
+  color: #ffffff;
+  background: #3f3f46;
+}
+
+.danger-action {
+  background: #7f1d1d;
+}
+
+.danger-action:hover {
+  background: #991b1b;
+}
+
+.signal-list li,
+.dose-result,
+.log-metrics span,
+.mini-list p,
+.vision-breakdown li,
+.storage-status,
+.ai-suggestions {
+  color: #d4d4d8;
+  background: var(--surface-raised);
+}
+
+.storage-status.synced {
+  color: #d4d4d8;
+  border-color: #52525b;
+  background: #202024;
+}
+
+.ai-suggestions {
+  border-color: #3f3f46;
+}
+
+.ai-suggestions ul {
+  color: #d4d4d8;
+}
+
+.empty-log {
+  border-color: #3f3f46;
+  color: var(--muted);
+  background: var(--surface-soft);
+}
+
+.calculator-safety {
+  color: #e5e5e5;
+  border-color: #52525b;
+  border-left-color: #a1a1aa;
+  background: #202024;
+}
+
+.calculator-safety span {
+  color: #d4d4d8;
+}
+
+.danger-message {
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(127, 29, 29, 0.35);
 }
 
 @media (max-width: 920px) {

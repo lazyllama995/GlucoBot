@@ -4,8 +4,8 @@
   "description": "Smart glucose decisions.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f4f8fb",
-  "theme_color": "#0f3d75",
+  "background_color": "#0c0c0d",
+  "theme_color": "#0c0c0d",
   "icons": [
     {
       "src": "/src/assets/icon-192.png",
