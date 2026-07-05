@@ -363,19 +363,12 @@ select:focus {
   box-shadow: 0 10px 26px rgba(16, 32, 51, 0.06);
 }
 
-.calculator-hero {
-  display: grid;
-  grid-template-columns: minmax(300px, 0.9fr) minmax(260px, 1fr);
-  gap: 14px;
-  align-items: stretch;
-}
-
 .dose-summary {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
   gap: 18px;
-  min-height: 150px;
+  min-height: 132px;
   padding: 18px 20px;
   border: 1px solid rgba(8, 35, 63, 0.72);
   border-radius: 8px;
@@ -1000,7 +993,6 @@ select:focus {
 
   .form-row,
   .calculator-form,
-  .calculator-hero,
   .field-grid,
   .exercise-row,
   .calculator-actions,

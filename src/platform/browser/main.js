@@ -82,22 +82,6 @@ function renderCalculatorTab() {
 function renderDoseCalculator() {
   return `
     <article class="dose-calculator" aria-labelledby="dose-title">
-      <div class="calculator-hero">
-        <div class="dose-summary" aria-label="Insulin dose">
-          <div>
-            <span>Insulin dose</span>
-            <label class="dose-edit">
-              <input form="dose-form" name="finalDose" type="number" min="0" step="0.01" value="${formatDose(manualDose)}" />
-              <small>units</small>
-            </label>
-          </div>
-          <strong>${doseResult.hasExercise ? "Exercise adjusted" : "Base formula"}</strong>
-        </div>
-        <div class="calculator-safety" aria-live="polite">
-          <span>Review</span>
-          <p>${doseResult.safetyNotes.join(" ")}</p>
-        </div>
-      </div>
       <form id="dose-form" class="calculator-form">
         <section class="calculator-section">
           <h2>Meal and glucose</h2>
@@ -151,6 +135,16 @@ function renderDoseCalculator() {
             <textarea name="annotation" rows="3" placeholder="Optional note">${annotationNote}</textarea>
           </label>
         </section>
+        <div class="dose-summary" aria-label="Insulin dose">
+          <div>
+            <span>Insulin dose</span>
+            <label class="dose-edit">
+              <input form="dose-form" name="finalDose" type="number" min="0" step="0.01" value="${formatDose(manualDose)}" />
+              <small>units</small>
+            </label>
+          </div>
+          <strong>${doseResult.hasExercise ? "Exercise adjusted" : "Base formula"}</strong>
+        </div>
         <div class="calculator-actions">
           <button type="submit">Calculate</button>
           <button type="button" id="annotate-button" class="secondary-action">Annotate</button>
