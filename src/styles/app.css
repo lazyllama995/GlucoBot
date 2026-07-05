@@ -1387,3 +1387,46 @@ textarea:focus,
   }
 
 }
+
+button,
+.tab-button,
+.brand-lockup strong,
+label,
+.calc-field span,
+.calc-field small,
+.dose-summary span,
+.dose-summary strong,
+.dose-edit small,
+.file-action,
+.storage-status,
+.log-entry time,
+.log-metrics span,
+.vision-result span,
+.vision-result small,
+.vision-breakdown li span,
+.ai-suggestions,
+.empty-log strong {
+  font-weight: 600;
+}
+
+h1,
+h2,
+h3,
+.section-heading h1,
+.log-shell h1,
+.vision-shell h1,
+.ratio-section h2,
+.calculator-section h2 {
+  font-weight: 650;
+}
+
+.dose-edit input,
+.calc-field input,
+.calc-field select,
+.dose-result strong,
+.vision-result strong,
+.log-entry-header strong,
+.vision-breakdown li strong,
+.icon-badge {
+  font-weight: 700;
+}
