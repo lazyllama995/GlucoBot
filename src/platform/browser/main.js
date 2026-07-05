@@ -47,14 +47,14 @@ function render() {
         <button class="tab-button ${activeTab === "calculator" ? "active" : ""}" data-tab="calculator" role="tab" aria-selected="${activeTab === "calculator"}">
           Calculator
         </button>
-        <button class="tab-button ${activeTab === "ratios" ? "active" : ""}" data-tab="ratios" role="tab" aria-selected="${activeTab === "ratios"}">
-          Ratios
-        </button>
         <button class="tab-button ${activeTab === "carbVision" ? "active" : ""}" data-tab="carbVision" role="tab" aria-selected="${activeTab === "carbVision"}">
-          Carb Vision
+          CarbScanner
         </button>
         <button class="tab-button ${activeTab === "log" ? "active" : ""}" data-tab="log" role="tab" aria-selected="${activeTab === "log"}">
           Logbook
+        </button>
+        <button class="tab-button ${activeTab === "ratios" ? "active" : ""}" data-tab="ratios" role="tab" aria-selected="${activeTab === "ratios"}">
+          Ratios
         </button>
       </div>
       ${renderActiveTab()}
@@ -235,7 +235,7 @@ function renderCarbVisionTab() {
     <section class="vision-shell" id="carb-vision-panel" role="tabpanel">
       <div class="section-heading">
         <span class="icon-badge cyan">C</span>
-        <h1>Carb Vision</h1>
+        <h1>CarbScanner</h1>
       </div>
       <form id="carb-vision-form" class="vision-form">
         <div class="vision-preview-panel">
