@@ -27,6 +27,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  overflow-x: hidden;
 }
 
 a {
@@ -355,6 +356,7 @@ select:focus {
 .dose-calculator {
   display: grid;
   gap: 18px;
+  min-width: 0;
   align-content: start;
   padding: clamp(18px, 3vw, 28px);
   border: 1px solid rgba(15, 61, 117, 0.16);
@@ -369,6 +371,7 @@ select:focus {
   justify-content: space-between;
   gap: 18px;
   min-height: 112px;
+  min-width: 0;
   padding: 14px;
   border: 1px solid rgba(8, 35, 63, 0.72);
   border-radius: 8px;
@@ -428,11 +431,13 @@ select:focus {
 .calculator-form {
   display: grid;
   gap: 14px;
+  min-width: 0;
 }
 
 .calculator-section {
   display: grid;
   gap: 12px;
+  min-width: 0;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -447,6 +452,7 @@ select:focus {
 .field-grid {
   display: grid;
   gap: 12px;
+  min-width: 0;
 }
 
 .primary-fields {
@@ -480,6 +486,7 @@ select:focus {
 .calc-field {
   position: relative;
   min-height: 112px;
+  min-width: 0;
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -576,6 +583,7 @@ select:focus {
 
 .annotation-field {
   display: block;
+  min-width: 0;
 }
 
 .annotation-field textarea {
@@ -1001,9 +1009,23 @@ select:focus {
 }
 
 @media (max-width: 560px) {
+  .navbar {
+    min-height: 86px;
+    padding: 14px 18px;
+  }
+
+  .brand-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .brand-lockup strong {
+    font-size: 1.25rem;
+  }
+
   main {
-    width: min(100% - 20px, 1180px);
-    padding-top: 14px;
+    width: 100%;
+    padding: 14px 10px 36px;
   }
 
   h1 {
@@ -1028,6 +1050,77 @@ select:focus {
   .app-tabs {
     width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 14px;
+  }
+
+  .tab-button {
+    min-height: 46px;
+    padding: 0 8px;
+    font-size: 0.98rem;
+  }
+
+  .dose-calculator {
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .calculator-section {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .calculator-section h2 {
+    font-size: 1.15rem;
+  }
+
+  .calc-field {
+    min-height: 92px;
+    padding: 12px;
+  }
+
+  .calc-field input {
+    min-height: 38px;
+    font-size: 1.55rem;
+  }
+
+  .calc-field select {
+    min-height: 38px;
+    font-size: 1rem;
+  }
+
+  .annotation-field textarea {
+    min-height: 96px;
+  }
+
+  .dose-summary {
+    align-items: center;
+    min-height: 92px;
+    gap: 10px;
+  }
+
+  .dose-edit {
+    grid-template-columns: minmax(86px, 1fr) auto;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .dose-edit input {
+    min-height: 38px;
+    font-size: 1.65rem;
+  }
+
+  .dose-edit small {
+    margin-bottom: 7px;
+    font-size: 0.82rem;
+  }
+
+  .dose-summary > strong {
+    padding: 7px 8px;
+    font-size: 0.76rem;
+  }
+
+  .calculator-actions {
+    gap: 10px;
   }
 
   .vision-preview-panel,
