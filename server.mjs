@@ -50,7 +50,8 @@ async function handleCarbVision(request, response) {
   if (!process.env.OPENAI_API_KEY) {
     sendJson(response, 501, {
       error: "Set OPENAI_API_KEY before using AI Carb Vision.",
-      setup: "Run OPENAI_API_KEY=your_key npm start, then upload the meal photo again."
+      setup:
+        "In Render, open glucobot > Environment, add OPENAI_API_KEY, save, then redeploy and upload the meal photo again."
     });
     return;
   }
