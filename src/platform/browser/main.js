@@ -38,7 +38,6 @@ function render() {
         <img src="./src/assets/glucobot-icon.png" alt="" class="brand-icon" />
         <div>
           <strong>${brand.ui.navbarTitle}</strong>
-          <span>${brand.tagline}</span>
         </div>
       </div>
     </header>
@@ -83,67 +82,80 @@ function renderCalculatorTab() {
 function renderDoseCalculator() {
   return `
     <article class="dose-calculator" aria-labelledby="dose-title">
-      <div class="dose-breakdown" aria-label="Dose breakdown">
-        <div class="single-dose">
-          <span>Insulin dose</span>
-          <label class="dose-edit">
-            <input form="dose-form" name="finalDose" type="number" min="0" step="0.01" value="${formatDose(manualDose)}" />
-            <small>units</small>
-          </label>
-          <small>${doseResult.hasExercise ? "Exercise adjusted" : "Base formula"}</small>
+      <div class="calculator-hero">
+        <div class="dose-summary" aria-label="Insulin dose">
+          <div>
+            <span>Insulin dose</span>
+            <label class="dose-edit">
+              <input form="dose-form" name="finalDose" type="number" min="0" step="0.01" value="${formatDose(manualDose)}" />
+              <small>units</small>
+            </label>
+          </div>
+          <strong>${doseResult.hasExercise ? "Exercise adjusted" : "Base formula"}</strong>
+        </div>
+        <div class="calculator-safety" aria-live="polite">
+          <span>Review</span>
+          <p>${doseResult.safetyNotes.join(" ")}</p>
         </div>
       </div>
       <form id="dose-form" class="calculator-form">
-        <label class="calc-field">
-          <span>Glucose</span>
-          <input name="glucose" type="number" min="0" value="${doseInputs.glucose}" />
-          <small>mg/dL</small>
-        </label>
-        <label class="calc-field">
-          <span>Sensor trend</span>
-          <select name="sensorTrend">
-            ${renderOptions(calculatorOptions.sensorTrends, doseInputs.sensorTrend)}
-          </select>
-          <small>trend factor</small>
-        </label>
-        <label class="calc-field">
-          <span>Carbs</span>
-          <input name="carbs" type="number" min="0" value="${doseInputs.carbs}" />
-          <small>grams</small>
-        </label>
-        <div class="exercise-row">
-          <label class="calc-field">
-            <span>Exercise</span>
-            <input name="exerciseHours" type="number" min="0" step="0.25" value="${doseInputs.exerciseHours}" />
-            <small>hours</small>
+        <section class="calculator-section">
+          <h2>Meal and glucose</h2>
+          <div class="field-grid primary-fields">
+            <label class="calc-field">
+              <span>Glucose</span>
+              <input name="glucose" type="number" min="0" value="${doseInputs.glucose}" />
+              <small>mg/dL</small>
+            </label>
+            <label class="calc-field">
+              <span>Carbs</span>
+              <input name="carbs" type="number" min="0" value="${doseInputs.carbs}" />
+              <small>grams</small>
+            </label>
+            <label class="calc-field">
+              <span>Sensor trend</span>
+              <select name="sensorTrend">
+                ${renderOptions(calculatorOptions.sensorTrends, doseInputs.sensorTrend)}
+              </select>
+              <small>trend factor</small>
+            </label>
+          </div>
+        </section>
+        <section class="calculator-section">
+          <h2>Exercise</h2>
+          <div class="field-grid exercise-row">
+            <label class="calc-field">
+              <span>Exercise</span>
+              <input name="exerciseHours" type="number" min="0" step="0.25" value="${doseInputs.exerciseHours}" />
+              <small>hours</small>
+            </label>
+            <label class="calc-field">
+              <span>Exercise intensity</span>
+              <select name="exerciseIntensity">
+                ${renderOptions(calculatorOptions.exerciseIntensities, doseInputs.exerciseIntensity, { includeBlank: true })}
+              </select>
+              <small>reduction</small>
+            </label>
+            <label class="calc-field">
+              <span>Exercise when</span>
+              <select name="exerciseWhen">
+                ${renderOptions(calculatorOptions.exerciseTimings, doseInputs.exerciseWhen, { includeBlank: true })}
+              </select>
+              <small>timing impact</small>
+            </label>
+          </div>
+        </section>
+        <section class="calculator-section">
+          <h2>Annotation</h2>
+          <label class="annotation-field">
+            <textarea name="annotation" rows="3" placeholder="Optional note">${annotationNote}</textarea>
           </label>
-          <label class="calc-field">
-            <span>Exercise intensity</span>
-            <select name="exerciseIntensity">
-              ${renderOptions(calculatorOptions.exerciseIntensities, doseInputs.exerciseIntensity, { includeBlank: true })}
-            </select>
-            <small>reduction</small>
-          </label>
-          <label class="calc-field">
-            <span>Exercise when</span>
-            <select name="exerciseWhen">
-              ${renderOptions(calculatorOptions.exerciseTimings, doseInputs.exerciseWhen, { includeBlank: true })}
-            </select>
-            <small>timing impact</small>
-          </label>
-        </div>
-        <label class="annotation-field">
-          <span>Annotation</span>
-          <textarea name="annotation" rows="3" placeholder="Optional note">${annotationNote}</textarea>
-        </label>
+        </section>
         <div class="calculator-actions">
           <button type="submit">Calculate</button>
           <button type="button" id="annotate-button" class="secondary-action">Annotate</button>
         </div>
       </form>
-      <div class="calculator-safety" aria-live="polite">
-        <p>${doseResult.safetyNotes.join(" ")}</p>
-      </div>
     </article>
   `;
 }
@@ -239,7 +251,16 @@ function renderCarbVisionTab() {
         <div class="vision-controls">
           <label class="calc-field">
             <span>Picture</span>
-            <input id="carb-image-input" name="mealImage" type="file" accept="image/*" />
+            <div class="photo-actions">
+              <label class="file-action">
+                Upload photo
+                <input id="carb-image-input" name="mealImage" type="file" accept="image/*" />
+              </label>
+              <label class="file-action camera-action">
+                Take photo
+                <input id="carb-camera-input" name="cameraImage" type="file" accept="image/*" capture="environment" />
+              </label>
+            </div>
             <small>meal photo</small>
           </label>
           <div class="vision-result" aria-live="polite">
@@ -400,23 +421,8 @@ function bindEvents() {
     render();
   });
 
-  document.querySelector("#carb-image-input")?.addEventListener("change", (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.addEventListener("load", () => {
-      carbVision = {
-        ...carbVision,
-        imageUrl: String(reader.result ?? ""),
-        estimate: null,
-        error: "",
-        status: "idle"
-      };
-      render();
-    });
-    reader.readAsDataURL(file);
-  });
+  document.querySelector("#carb-image-input")?.addEventListener("change", handleCarbVisionImageSelection);
+  document.querySelector("#carb-camera-input")?.addEventListener("change", handleCarbVisionImageSelection);
 
   document.querySelector("#carb-vision-form")?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -434,6 +440,24 @@ function bindEvents() {
     activeTab = "calculator";
     render();
   });
+}
+
+function handleCarbVisionImageSelection(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      carbVision = {
+        ...carbVision,
+        imageUrl: String(reader.result ?? ""),
+        estimate: null,
+        error: "",
+        status: "idle"
+      };
+      render();
+    });
+    reader.readAsDataURL(file);
 }
 
 function updateDoseFromForm(formElement, { resetManualDose } = { resetManualDose: true }) {
