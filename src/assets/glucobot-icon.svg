@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">GlucoBot icon</title>
+  <desc id="desc">A friendly robot head combined with a glucose drop.</desc>
+  <defs>
+    <linearGradient id="drop" x1="22" x2="46" y1="10" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#0f3d75"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#drop)" d="M32 5c7 9 17 19 17 32a17 17 0 0 1-34 0C15 24 25 14 32 5Z"/>
+  <rect x="16" y="24" width="32" height="25" rx="9" fill="#ffffff"/>
+  <rect x="24" y="16" width="16" height="6" rx="3" fill="#0f3d75"/>
+  <circle cx="25" cy="36" r="3.5" fill="#0f3d75"/>
+  <circle cx="39" cy="36" r="3.5" fill="#0f3d75"/>
+  <path fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="3" d="M25 43c4 4 10 4 14 0"/>
+  <path fill="#22d3ee" d="M46 16c4 4 7 8 7 13a8 8 0 0 1-16 0c0-5 5-10 9-13Z"/>
+</svg>

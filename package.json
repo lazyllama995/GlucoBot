@@ -1,0 +1,22 @@
+{
+  "name": "glucobot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GlucoBot - Smart glucose decisions.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sergisoler/glucobot-app.git"
+  },
+  "keywords": [
+    "glucose",
+    "diabetes",
+    "health",
+    "glucobot"
+  ],
+  "license": "UNLICENSED"
+}
