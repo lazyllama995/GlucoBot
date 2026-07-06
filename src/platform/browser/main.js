@@ -303,7 +303,7 @@ function renderCarbVisionTab() {
         </div>
       </form>
       <div class="calculator-safety">
-        <p>Photo carb estimates are approximate. Confirm portions and ingredients before dosing.</p>
+        <p>Photo carb estimates are approximate.</p>
       </div>
     </section>
   `;
