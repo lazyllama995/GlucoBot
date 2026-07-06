@@ -277,6 +277,14 @@ h3 {
   margin-bottom: 18px;
 }
 
+.tab-title h1,
+.log-shell h1,
+.synch-shell h1 {
+  margin-bottom: 0;
+  font-size: 1.8rem;
+  line-height: 1.1;
+}
+
 .icon-badge {
   display: grid;
   place-items: center;
@@ -972,12 +980,6 @@ select:focus {
   margin-bottom: 0;
 }
 
-.log-shell h1 {
-  margin-bottom: 0;
-  font-size: 2rem;
-  line-height: 1.1;
-}
-
 .log-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1421,6 +1423,16 @@ textarea:focus,
 
   h1 {
     font-size: 2.4rem;
+  }
+
+  .tab-title h1,
+  .log-shell h1,
+  .synch-shell h1 {
+    font-size: 1.8rem;
+  }
+
+  .vision-shell h1 {
+    font-size: 2rem;
   }
 
   .form-row,

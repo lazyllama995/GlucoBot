@@ -105,6 +105,7 @@ function renderActiveTab() {
 function renderCalculatorTab() {
   return `
     <section class="calculator-shell" id="calculator-panel" role="tabpanel">
+      ${renderTabTitle("Calculator")}
       ${renderDoseCalculator()}
     </section>
   `;
@@ -195,6 +196,7 @@ function renderDoseCalculator() {
 function renderRatiosTab() {
   return `
     <section class="ratios-shell" id="ratios-panel" role="tabpanel">
+      ${renderTabTitle("Ratios")}
       <form id="ratios-form" class="ratios-form">
         <section class="ratio-section">
           <h2>Ratios</h2>
@@ -239,10 +241,7 @@ function renderLogTab() {
   return `
     <section class="log-shell" id="log-panel" role="tabpanel">
       <div class="log-header">
-        <div class="section-heading">
-          <span class="icon-badge blue">L</span>
-          <h1>Logbook</h1>
-        </div>
+        ${renderTabTitle("Logbook")}
         <div class="log-actions">
           <button type="button" id="ai-suggest-button">AI Suggest</button>
         </div>
@@ -326,10 +325,7 @@ function renderCarbVisionTab() {
 function renderSynchLibreTab() {
   return `
     <section class="synch-shell" id="synch-libre-panel" role="tabpanel">
-      <div class="section-heading">
-        <span class="icon-badge sync">S</span>
-        <h1>SynchLibre</h1>
-      </div>
+      ${renderTabTitle("SynchLibre")}
       <div class="storage-status ${libreSync.configured ? "synced" : ""}">
         ${escapeHtml(libreSync.message)}
       </div>
@@ -368,6 +364,14 @@ function renderSynchLibreTab() {
         <p>SynchLibre uses an unofficial Libre Link Up API. Confirm readings in your official Libre app.</p>
       </div>
     </section>
+  `;
+}
+
+function renderTabTitle(title) {
+  return `
+    <div class="section-heading tab-title">
+      <h1>${title}</h1>
+    </div>
   `;
 }
 
