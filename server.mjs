@@ -128,7 +128,7 @@ async function estimateCarbsWithOpenAI(imageDataUrl) {
             {
               type: "input_text",
               text:
-                "Analyze this meal photo for diabetes carb counting. Estimate visible foods, portions, and total carbohydrates in grams. Return JSON only with foods, totalCarbs, confidence, and notes. Do not recommend insulin or dosing."
+                "Analyze this meal photo for diabetes carb counting. Estimate visible foods, approximate portion size, estimated quantity in grams for each food, and carbohydrates in grams for each food. Return JSON only with foods, totalCarbs, confidence, and notes. Do not recommend insulin or dosing."
             },
             {
               type: "input_image",
@@ -154,9 +154,10 @@ async function estimateCarbsWithOpenAI(imageDataUrl) {
                   properties: {
                     name: { type: "string" },
                     portion: { type: "string" },
+                    grams: { type: "number" },
                     carbs: { type: "number" }
                   },
-                  required: ["name", "portion", "carbs"]
+                  required: ["name", "portion", "grams", "carbs"]
                 }
               },
               totalCarbs: { type: "number" },

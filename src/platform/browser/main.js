@@ -331,10 +331,16 @@ function renderCarbVisionBreakdown() {
           ? `<ul>
               ${carbVision.estimate.foods
                 .map(
-                  (food) => `
-                    <li>
-                      <span>${escapeHtml(food.name)}${food.portion ? `, ${escapeHtml(food.portion)}` : ""}</span>
-                      <strong>${food.carbs}g</strong>
+                  (food, index) => `
+                    <li class="vision-food-row">
+                      <div class="vision-food-name">
+                        <span>${escapeHtml(food.name)}${food.portion ? `, ${escapeHtml(food.portion)}` : ""}</span>
+                      </div>
+                      <label class="food-grams-field">
+                        <input class="food-grams-input" data-food-index="${index}" type="number" min="0" step="1" value="${food.grams}" />
+                        <small>g</small>
+                      </label>
+                      <strong>${food.carbs}g carbs</strong>
                     </li>
                   `
                 )
@@ -461,6 +467,17 @@ function bindEvents() {
 
   document.querySelector("#carb-image-input")?.addEventListener("change", handleCarbVisionImageSelection);
   document.querySelector("#carb-camera-input")?.addEventListener("change", handleCarbVisionImageSelection);
+  document.querySelectorAll(".food-grams-input").forEach((input) => {
+    input.addEventListener("change", (event) => {
+      updateCarbVisionFoodGrams(Number(event.currentTarget.dataset.foodIndex), event.currentTarget.value);
+      render();
+    });
+    input.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      event.currentTarget.blur();
+    });
+  });
 
   document.querySelector("#carb-vision-form")?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -496,6 +513,29 @@ function handleCarbVisionImageSelection(event) {
       render();
     });
     reader.readAsDataURL(file);
+}
+
+function updateCarbVisionFoodGrams(index, value) {
+  if (!carbVision.estimate || !Number.isInteger(index)) return;
+  const grams = Math.max(0, Math.round(Number(value) || 0));
+  const foods = carbVision.estimate.foods.map((food, foodIndex) => {
+    if (foodIndex !== index) return food;
+    const carbsPerGram = food.carbsPerGram || (food.grams > 0 ? food.carbs / food.grams : 0);
+    return {
+      ...food,
+      grams,
+      carbs: Math.round(grams * carbsPerGram)
+    };
+  });
+
+  carbVision = {
+    ...carbVision,
+    estimate: {
+      ...carbVision.estimate,
+      foods,
+      totalCarbs: foods.reduce((sum, food) => sum + food.carbs, 0)
+    }
+  };
 }
 
 async function hydrateLogsFromDatabase() {

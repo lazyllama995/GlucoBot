@@ -3,6 +3,7 @@ export const fallbackCarbVisionEstimate = {
     {
       name: "Mixed meal",
       portion: "medium visual portion",
+      grams: 150,
       carbs: 40
     }
   ],
@@ -27,10 +28,14 @@ export function normalizeCarbVisionEstimate(value) {
 }
 
 function normalizeFoodEstimate(food) {
+  const carbs = toNonNegativeNumber(food?.carbs) ?? 0;
+  const grams = toNonNegativeNumber(food?.grams ?? extractGrams(food?.portion)) ?? 0;
   return {
     name: String(food?.name ?? "").trim(),
     portion: String(food?.portion ?? "").trim(),
-    carbs: toNonNegativeNumber(food?.carbs) ?? 0
+    grams,
+    carbs,
+    carbsPerGram: grams > 0 ? carbs / grams : 0
   };
 }
 
@@ -47,4 +52,9 @@ function toNonNegativeNumber(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return null;
   return Math.max(0, Math.round(number));
+}
+
+function extractGrams(value) {
+  const match = String(value ?? "").match(/(\d+(?:[.,]\d+)?)\s*g(?:rams?)?\b/i);
+  return match ? Number(match[1].replace(",", ".")) : null;
 }

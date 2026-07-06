@@ -5,7 +5,7 @@ import { normalizeCarbVisionEstimate } from "../src/core/carbVision.js";
 test("normalizes AI carb vision estimates", () => {
   const estimate = normalizeCarbVisionEstimate({
     foods: [
-      { name: "Rice", portion: "1 cup", carbs: 44.6 },
+      { name: "Rice", portion: "1 cup", grams: 160, carbs: 44.6 },
       { name: "Chicken", portion: "120g", carbs: -2 }
     ],
     totalCarbs: 46.2,
@@ -15,8 +15,8 @@ test("normalizes AI carb vision estimates", () => {
 
   assert.deepEqual(estimate, {
     foods: [
-      { name: "Rice", portion: "1 cup", carbs: 45 },
-      { name: "Chicken", portion: "120g", carbs: 0 }
+      { name: "Rice", portion: "1 cup", grams: 160, carbs: 45, carbsPerGram: 45 / 160 },
+      { name: "Chicken", portion: "120g", grams: 120, carbs: 0, carbsPerGram: 0 }
     ],
     totalCarbs: 46,
     confidence: "medium",
@@ -27,8 +27,8 @@ test("normalizes AI carb vision estimates", () => {
 test("sums food carbs when total is missing", () => {
   const estimate = normalizeCarbVisionEstimate({
     foods: [
-      { name: "Bread", portion: "2 slices", carbs: 30 },
-      { name: "Apple", portion: "small", carbs: 15 }
+      { name: "Bread", portion: "2 slices", grams: 60, carbs: 30 },
+      { name: "Apple", portion: "small", grams: 95, carbs: 15 }
     ],
     confidence: "unknown"
   });

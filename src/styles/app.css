@@ -849,22 +849,55 @@ select:focus {
 }
 
 .vision-breakdown li {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px auto;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
   border-radius: 8px;
   background: #f4f8fb;
 }
 
+.vision-food-name {
+  min-width: 0;
+}
+
 .vision-breakdown li span {
+  display: block;
+  overflow-wrap: anywhere;
   color: #375169;
   font-weight: 800;
 }
 
 .vision-breakdown li strong {
   color: var(--primary-dark);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.food-grams-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 4px;
+  min-width: 0;
+}
+
+.food-grams-field input {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: var(--ink);
+  background: var(--field);
+  font-weight: 650;
+}
+
+.food-grams-field small {
+  padding-bottom: 7px;
+  color: var(--muted);
+  font-size: 0.72rem;
 }
 
 .vision-breakdown p {
@@ -1369,7 +1402,7 @@ textarea:focus,
     border-right: 0;
     border-bottom: 0;
     border-left: 0;
-    border-radius: 18px 18px 0 0;
+    border-radius: 0;
   }
 
   .tab-button {
@@ -1452,6 +1485,15 @@ textarea:focus,
   .vision-preview,
   .vision-placeholder {
     min-height: 300px;
+  }
+
+  .vision-breakdown li {
+    grid-template-columns: minmax(0, 1fr) 88px;
+  }
+
+  .vision-breakdown li strong {
+    grid-column: 1 / -1;
+    text-align: left;
   }
 
   .log-header {
