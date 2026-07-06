@@ -269,10 +269,7 @@ function renderLogTab() {
 function renderCarbVisionTab() {
   return `
     <section class="vision-shell" id="carb-vision-panel" role="tabpanel">
-      <div class="section-heading">
-        <span class="icon-badge cyan">C</span>
-        <h1>CarbScanner</h1>
-      </div>
+      ${renderTabTitle("CarbScanner")}
       <form id="carb-vision-form" class="vision-form">
         <div class="vision-preview-panel">
           ${

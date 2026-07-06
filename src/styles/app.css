@@ -278,6 +278,7 @@ h3 {
 }
 
 .tab-title h1,
+.vision-shell .tab-title h1,
 .log-shell h1,
 .synch-shell h1 {
   margin-bottom: 0;
@@ -1426,13 +1427,10 @@ textarea:focus,
   }
 
   .tab-title h1,
+  .vision-shell .tab-title h1,
   .log-shell h1,
   .synch-shell h1 {
     font-size: 1.8rem;
-  }
-
-  .vision-shell h1 {
-    font-size: 2rem;
   }
 
   .form-row,
