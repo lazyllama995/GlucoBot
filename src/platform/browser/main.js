@@ -25,6 +25,7 @@ let doseInputs = {
   exerciseIntensity: "",
   exerciseWhen: ""
 };
+let exerciseEnabled = Number(doseInputs.exerciseHours) > 0;
 let annotationNote = "";
 let doseResult = calculateCorrectionDose({ ...doseInputs, ratios: settings });
 let manualDose = doseResult.recommendedDose;
@@ -118,29 +119,36 @@ function renderDoseCalculator() {
             </label>
           </div>
         </section>
-        <section class="calculator-section">
-          <h2>Exercise</h2>
-          <div class="field-grid exercise-row">
-            <label class="calc-field">
-              <span>Exercise</span>
-              <input name="exerciseHours" type="number" min="0" step="0.25" value="${doseInputs.exerciseHours}" />
-              <small>hours</small>
-            </label>
-            <label class="calc-field">
-              <span>Exercise intensity</span>
-              <select name="exerciseIntensity">
-                ${renderOptions(calculatorOptions.exerciseIntensities, doseInputs.exerciseIntensity, { includeBlank: true })}
-              </select>
-              <small>reduction</small>
-            </label>
-            <label class="calc-field">
-              <span>Exercise when</span>
-              <select name="exerciseWhen">
-                ${renderOptions(calculatorOptions.exerciseTimings, doseInputs.exerciseWhen, { includeBlank: true })}
-              </select>
-              <small>timing impact</small>
-            </label>
-          </div>
+        <section class="calculator-section exercise-section">
+          <label class="exercise-toggle">
+            <input name="exerciseEnabled" type="checkbox" ${exerciseEnabled ? "checked" : ""} />
+            <span>Exercise</span>
+          </label>
+          ${
+            exerciseEnabled
+              ? `<div class="field-grid exercise-row">
+                  <label class="calc-field">
+                    <span>Exercise</span>
+                    <input name="exerciseHours" type="number" min="0" step="0.25" value="${doseInputs.exerciseHours}" />
+                    <small>hours</small>
+                  </label>
+                  <label class="calc-field">
+                    <span>Exercise intensity</span>
+                    <select name="exerciseIntensity">
+                      ${renderOptions(calculatorOptions.exerciseIntensities, doseInputs.exerciseIntensity, { includeBlank: true })}
+                    </select>
+                    <small>reduction</small>
+                  </label>
+                  <label class="calc-field">
+                    <span>Exercise when</span>
+                    <select name="exerciseWhen">
+                      ${renderOptions(calculatorOptions.exerciseTimings, doseInputs.exerciseWhen, { includeBlank: true })}
+                    </select>
+                    <small>timing impact</small>
+                  </label>
+                </div>`
+              : ""
+          }
         </section>
         <section class="calculator-section">
           <h2>Annotation</h2>
@@ -219,8 +227,6 @@ function renderLogTab() {
           <h1>Logbook</h1>
         </div>
         <div class="log-actions">
-          <button type="button" id="reset-log-button" class="danger-action">Reset data</button>
-          <button type="button" id="export-csv-button" class="secondary-action">Export CSV</button>
           <button type="button" id="ai-suggest-button">AI Suggest</button>
         </div>
       </div>
@@ -236,6 +242,10 @@ function renderLogTab() {
               <span>Calculate a dose, then use Annotate to save it here with time and date.</span>
             </div>`
       }
+      <div class="log-footer-actions">
+        <button type="button" id="reset-log-button" class="danger-action">Reset data</button>
+        <button type="button" id="export-csv-button" class="secondary-action">Export CSV</button>
+      </div>
     </section>
   `;
 }
@@ -381,6 +391,21 @@ function bindEvents() {
     render();
   });
 
+  document.querySelector('input[name="exerciseEnabled"]')?.addEventListener("change", (event) => {
+    exerciseEnabled = event.currentTarget.checked;
+    if (!exerciseEnabled) {
+      doseInputs = {
+        ...doseInputs,
+        exerciseHours: "",
+        exerciseIntensity: "",
+        exerciseWhen: ""
+      };
+      doseResult = calculateCorrectionDose({ ...doseInputs, ratios: settings });
+      manualDose = doseResult.recommendedDose;
+    }
+    render();
+  });
+
   document.querySelector("#annotate-button")?.addEventListener("click", () => {
     const form = document.querySelector("#dose-form");
     updateDoseFromForm(form, { resetManualDose: false });
@@ -514,9 +539,10 @@ function persistLogs() {
 
 function updateDoseFromForm(formElement, { resetManualDose } = { resetManualDose: true }) {
   const form = new FormData(formElement);
-  const rawExerciseHours = form.get("exerciseHours");
-  const exerciseHours = rawExerciseHours === "" ? "" : Number(rawExerciseHours);
-  const hasExercise = Number.isFinite(Number(exerciseHours)) && Number(exerciseHours) > 0;
+  exerciseEnabled = form.get("exerciseEnabled") === "on";
+  const rawExerciseHours = exerciseEnabled ? form.get("exerciseHours") : "";
+  const exerciseHours = rawExerciseHours === "" || rawExerciseHours == null ? "" : Number(rawExerciseHours);
+  const hasExercise = exerciseEnabled && Number.isFinite(Number(exerciseHours)) && Number(exerciseHours) > 0;
   const payload = {
     glucose: Number(form.get("glucose")),
     sensorTrend: form.get("sensorTrend"),

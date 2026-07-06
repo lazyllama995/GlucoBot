@@ -468,6 +468,34 @@ select:focus {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.exercise-section {
+  align-content: start;
+}
+
+.exercise-toggle {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 42px;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--field);
+  cursor: pointer;
+}
+
+.exercise-toggle input {
+  width: 18px;
+  min-height: 18px;
+  accent-color: #a1a1aa;
+}
+
+.exercise-toggle span {
+  font-weight: 600;
+}
+
 .calculator-form button {
   min-height: 54px;
   background: var(--primary);
@@ -849,6 +877,20 @@ select:focus {
   min-height: 40px;
 }
 
+.log-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.log-footer-actions button {
+  min-height: 40px;
+}
+
 .storage-status {
   display: inline-flex;
   width: fit-content;
@@ -1155,7 +1197,8 @@ textarea:focus,
 
 .secondary-action,
 .calculator-actions .secondary-action,
-.file-action {
+.file-action,
+.exercise-toggle {
   color: var(--ink);
   border-color: #3f3f46;
   background: #202024;
@@ -1370,8 +1413,13 @@ textarea:focus,
     justify-content: stretch;
   }
 
-  .log-actions button {
+  .log-actions button,
+  .log-footer-actions button {
     flex: 1 1 100%;
+  }
+
+  .log-footer-actions {
+    justify-content: stretch;
   }
 
   .ratios-form > button {
