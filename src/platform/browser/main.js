@@ -105,7 +105,6 @@ function renderActiveTab() {
 function renderCalculatorTab() {
   return `
     <section class="calculator-shell" id="calculator-panel" role="tabpanel">
-      ${renderTabTitle("Calculator")}
       ${renderDoseCalculator()}
     </section>
   `;
@@ -114,6 +113,7 @@ function renderCalculatorTab() {
 function renderDoseCalculator() {
   return `
     <article class="dose-calculator" aria-labelledby="dose-title">
+      ${renderTabTitle("Calculator")}
       <form id="dose-form" class="calculator-form">
         <section class="calculator-section">
           <h2>Meal and glucose</h2>
