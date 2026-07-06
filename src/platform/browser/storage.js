@@ -65,6 +65,23 @@ export async function saveDatabaseLogs(logs) {
   return payload;
 }
 
+export async function loadLibreStatus() {
+  return fetchLibreJson("/api/libre/status");
+}
+
+export async function saveLibreSetup({ email, password, patientId }) {
+  return fetchLibreJson("/api/libre/setup", {
+    method: "POST",
+    body: JSON.stringify({ email, password, patientId })
+  });
+}
+
+export async function syncLibreReading() {
+  return fetchLibreJson("/api/libre/sync", {
+    method: "POST"
+  });
+}
+
 export function loadSettings() {
   return mergeRatioSettings(readJson(keys.settings, {}));
 }
@@ -80,4 +97,20 @@ function readJson(key, fallback) {
   } catch {
     return fallback;
   }
+}
+
+async function fetchLibreJson(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "x-glucobot-client-id": getClientId(),
+      ...(options.headers ?? {})
+    }
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.setup || payload.error || "SynchLibre request failed.");
+  }
+  return payload;
 }

@@ -4,12 +4,15 @@ import { calculatorOptions, calculateCorrectionDose } from "../../core/doseCalcu
 import { createLogEntry, logTypes } from "../../core/events.js";
 import {
   loadDatabaseLogs,
+  loadLibreStatus,
   loadLogs,
   loadSettings,
   prepareCalculatorLogStorage,
   saveDatabaseLogs,
+  saveLibreSetup,
   saveLogs,
-  saveSettings
+  saveSettings,
+  syncLibreReading
 } from "./storage.js";
 
 const app = document.querySelector("#app");
@@ -36,6 +39,14 @@ let carbVision = {
   status: "idle",
   error: ""
 };
+let libreSync = {
+  configured: false,
+  email: "",
+  patientId: "",
+  latest: null,
+  status: "idle",
+  message: "Add your Libre Link Up account to sync glucose readings."
+};
 let logbookStorage = {
   mode: "device",
   message: "Saved on this device"
@@ -44,6 +55,7 @@ let logbookStorage = {
 saveLogs(logs);
 render();
 hydrateLogsFromDatabase();
+hydrateLibreStatus();
 
 function render() {
   app.innerHTML = `
@@ -65,6 +77,7 @@ function render() {
       ${renderTabButton("carbVision", "CarbScanner", "./src/assets/tab-camera.png")}
       ${renderTabButton("log", "Logbook", "./src/assets/tab-logbook.png")}
       ${renderTabButton("ratios", "Ratios", "./src/assets/tab-ratios.png")}
+      ${renderTabButton("synchLibre", "SynchLibre", "./src/assets/tab-synch-libre.png")}
     </nav>
   `;
 
@@ -85,6 +98,7 @@ function renderActiveTab() {
   if (activeTab === "calculator") return renderCalculatorTab();
   if (activeTab === "ratios") return renderRatiosTab();
   if (activeTab === "carbVision") return renderCarbVisionTab();
+  if (activeTab === "synchLibre") return renderSynchLibreTab();
   return renderLogTab();
 }
 
@@ -309,6 +323,74 @@ function renderCarbVisionTab() {
   `;
 }
 
+function renderSynchLibreTab() {
+  return `
+    <section class="synch-shell" id="synch-libre-panel" role="tabpanel">
+      <div class="section-heading">
+        <span class="icon-badge sync">S</span>
+        <h1>SynchLibre</h1>
+      </div>
+      <div class="storage-status ${libreSync.configured ? "synced" : ""}">
+        ${escapeHtml(libreSync.message)}
+      </div>
+      <form id="synch-libre-form" class="synch-form">
+        <section class="calculator-section">
+          <h2>Libre Link Up account</h2>
+          <div class="field-grid primary-fields">
+            <label class="calc-field">
+              <span>Email</span>
+              <input name="libreEmail" type="email" autocomplete="username" value="${escapeHtml(libreSync.email)}" />
+              <small>Libre Link Up</small>
+            </label>
+            <label class="calc-field">
+              <span>Password</span>
+              <input name="librePassword" type="password" autocomplete="current-password" />
+              <small>${libreSync.configured ? "enter to update" : "required"}</small>
+            </label>
+            <label class="calc-field">
+              <span>Patient ID</span>
+              <input name="librePatientId" type="text" value="${escapeHtml(libreSync.patientId)}" />
+              <small>optional</small>
+            </label>
+          </div>
+        </section>
+        <div class="synch-actions">
+          <button type="submit" ${libreSync.status === "saving" ? "disabled" : ""}>
+            ${libreSync.status === "saving" ? "Saving..." : "Save and test"}
+          </button>
+          <button type="button" id="sync-libre-button" class="secondary-action" ${!libreSync.configured || libreSync.status === "syncing" ? "disabled" : ""}>
+            ${libreSync.status === "syncing" ? "Syncing..." : "Sync Libre now"}
+          </button>
+        </div>
+      </form>
+      ${renderLibreLatest()}
+      <div class="calculator-safety">
+        <p>SynchLibre uses an unofficial Libre Link Up API. Confirm readings in your official Libre app.</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderLibreLatest() {
+  if (!libreSync.latest) {
+    return `
+      <div class="empty-log">
+        <strong>No Libre reading synced yet</strong>
+        <span>Save your account, then sync Libre to pull the latest glucose value.</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="libre-reading-card">
+      <span>Latest Libre glucose</span>
+      <strong>${libreSync.latest.value} mg/dL</strong>
+      <small>${escapeHtml(libreSync.latest.sensorTrend)}${libreSync.latest.timestamp ? `, ${formatDateTime(new Date(libreSync.latest.timestamp))}` : ""}</small>
+      <button type="button" id="use-libre-reading-button" class="secondary-action">Use in calculator</button>
+    </div>
+  `;
+}
+
 function renderCarbVisionStatus() {
   if (carbVision.status === "analyzing") return "GlucoBot is analyzing the meal photo";
   if (carbVision.error) return escapeHtml(carbVision.error);
@@ -495,6 +577,28 @@ function bindEvents() {
     activeTab = "calculator";
     render();
   });
+
+  document.querySelector("#synch-libre-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveSynchLibreSetup(event.currentTarget);
+  });
+
+  document.querySelector("#sync-libre-button")?.addEventListener("click", () => {
+    syncSynchLibreReading();
+  });
+
+  document.querySelector("#use-libre-reading-button")?.addEventListener("click", () => {
+    if (!libreSync.latest) return;
+    doseInputs = {
+      ...doseInputs,
+      glucose: libreSync.latest.value,
+      sensorTrend: libreSync.latest.sensorTrend || "Stable"
+    };
+    doseResult = calculateCorrectionDose({ ...doseInputs, ratios: settings });
+    manualDose = doseResult.recommendedDose;
+    activeTab = "calculator";
+    render();
+  });
 }
 
 function handleCarbVisionImageSelection(event) {
@@ -559,6 +663,88 @@ async function hydrateLogsFromDatabase() {
     };
     render();
   }
+}
+
+async function hydrateLibreStatus() {
+  try {
+    const payload = await loadLibreStatus();
+    libreSync = {
+      ...libreSync,
+      configured: Boolean(payload.configured),
+      email: payload.email ?? "",
+      patientId: payload.patientId ?? "",
+      message: payload.configured ? "Libre account saved. Ready to sync." : libreSync.message
+    };
+    if (activeTab === "synchLibre") render();
+  } catch (error) {
+    libreSync = {
+      ...libreSync,
+      message: error.message || "SynchLibre setup is unavailable."
+    };
+    if (activeTab === "synchLibre") render();
+  }
+}
+
+async function saveSynchLibreSetup(formElement) {
+  const form = new FormData(formElement);
+  libreSync = {
+    ...libreSync,
+    status: "saving",
+    message: "Testing Libre Link Up account..."
+  };
+  render();
+
+  try {
+    const payload = await saveLibreSetup({
+      email: form.get("libreEmail"),
+      password: form.get("librePassword"),
+      patientId: form.get("librePatientId")
+    });
+    libreSync = {
+      ...libreSync,
+      configured: true,
+      email: form.get("libreEmail") ?? "",
+      patientId: form.get("librePatientId") ?? "",
+      latest: payload.reading ?? null,
+      status: "ready",
+      message: "Libre account saved and latest glucose synced."
+    };
+  } catch (error) {
+    libreSync = {
+      ...libreSync,
+      status: "error",
+      message: error.message || "Could not save Libre setup."
+    };
+  }
+
+  render();
+}
+
+async function syncSynchLibreReading() {
+  libreSync = {
+    ...libreSync,
+    status: "syncing",
+    message: "Syncing latest Libre glucose..."
+  };
+  render();
+
+  try {
+    const payload = await syncLibreReading();
+    libreSync = {
+      ...libreSync,
+      latest: payload.reading ?? null,
+      status: "ready",
+      message: "Latest Libre glucose synced."
+    };
+  } catch (error) {
+    libreSync = {
+      ...libreSync,
+      status: "error",
+      message: error.message || "Could not sync Libre glucose."
+    };
+  }
+
+  render();
 }
 
 function persistLogs() {
