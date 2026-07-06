@@ -430,6 +430,7 @@ async function fetchLibreReading({ email, password, patientId }) {
     email,
     password,
     patientId: patientId || undefined,
+    lluVersion: process.env.LIBRE_LINKUP_VERSION ?? "4.16.0",
     cache: false
   });
   await client.login();
