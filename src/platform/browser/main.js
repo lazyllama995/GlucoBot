@@ -40,6 +40,7 @@ let carbVision = {
   error: ""
 };
 let libreSync = {
+  available: true,
   configured: false,
   email: "",
   patientId: "",
@@ -320,10 +321,11 @@ function renderCarbVisionTab() {
 }
 
 function renderSynchLibreTab() {
+  const disabled = !libreSync.available || libreSync.status === "saving";
   return `
     <section class="synch-shell" id="synch-libre-panel" role="tabpanel">
       ${renderTabTitle("SynchLibre")}
-      <div class="storage-status ${libreSync.configured ? "synced" : ""}">
+      <div class="storage-status ${libreSync.configured ? "synced" : ""} ${!libreSync.available ? "warning-status" : ""}">
         ${escapeHtml(libreSync.message)}
       </div>
       <form id="synch-libre-form" class="synch-form">
@@ -332,26 +334,26 @@ function renderSynchLibreTab() {
           <div class="field-grid primary-fields">
             <label class="calc-field">
               <span>Email</span>
-              <input name="libreEmail" type="email" autocomplete="username" value="${escapeHtml(libreSync.email)}" />
+              <input name="libreEmail" type="email" autocomplete="username" value="${escapeHtml(libreSync.email)}" ${disabled ? "disabled" : ""} />
               <small>Libre Link Up</small>
             </label>
             <label class="calc-field">
               <span>Password</span>
-              <input name="librePassword" type="password" autocomplete="current-password" />
+              <input name="librePassword" type="password" autocomplete="current-password" ${disabled ? "disabled" : ""} />
               <small>${libreSync.configured ? "enter to update" : "required"}</small>
             </label>
             <label class="calc-field">
               <span>Patient ID</span>
-              <input name="librePatientId" type="text" value="${escapeHtml(libreSync.patientId)}" />
+              <input name="librePatientId" type="text" value="${escapeHtml(libreSync.patientId)}" ${disabled ? "disabled" : ""} />
               <small>optional</small>
             </label>
           </div>
         </section>
         <div class="synch-actions">
-          <button type="submit" ${libreSync.status === "saving" ? "disabled" : ""}>
+          <button type="submit" ${disabled ? "disabled" : ""}>
             ${libreSync.status === "saving" ? "Saving..." : "Save and test"}
           </button>
-          <button type="button" id="sync-libre-button" class="secondary-action" ${!libreSync.configured || libreSync.status === "syncing" ? "disabled" : ""}>
+          <button type="button" id="sync-libre-button" class="secondary-action" ${!libreSync.available || !libreSync.configured || libreSync.status === "syncing" ? "disabled" : ""}>
             ${libreSync.status === "syncing" ? "Syncing..." : "Sync Libre now"}
           </button>
         </div>
@@ -671,6 +673,7 @@ async function hydrateLibreStatus() {
     const payload = await loadLibreStatus();
     libreSync = {
       ...libreSync,
+      available: true,
       configured: Boolean(payload.configured),
       email: payload.email ?? "",
       patientId: payload.patientId ?? "",
@@ -680,13 +683,18 @@ async function hydrateLibreStatus() {
   } catch (error) {
     libreSync = {
       ...libreSync,
-      message: error.message || "SynchLibre setup is unavailable."
+      available: false,
+      status: "unavailable",
+      message:
+        error.message ||
+        "SynchLibre needs the GlucoBot database. In Render, sync the Blueprint and confirm DATABASE_URL is connected."
     };
     if (activeTab === "synchLibre") render();
   }
 }
 
 async function saveSynchLibreSetup(formElement) {
+  if (!libreSync.available) return;
   const form = new FormData(formElement);
   libreSync = {
     ...libreSync,
@@ -722,6 +730,7 @@ async function saveSynchLibreSetup(formElement) {
 }
 
 async function syncSynchLibreReading() {
+  if (!libreSync.available) return;
   libreSync = {
     ...libreSync,
     status: "syncing",

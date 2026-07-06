@@ -1025,6 +1025,12 @@ select:focus {
   background: #eefbf3;
 }
 
+.storage-status.warning-status {
+  color: #92400e;
+  border-color: rgba(245, 158, 11, 0.28);
+  background: #fff7ed;
+}
+
 .ai-suggestions {
   margin-bottom: 16px;
   padding: 16px;
@@ -1351,6 +1357,12 @@ textarea:focus,
 .storage-status.synced {
   color: #d4d4d8;
   border-color: #52525b;
+  background: #202024;
+}
+
+.storage-status.warning-status {
+  color: #d4d4d8;
+  border-color: #3f3f46;
   background: #202024;
 }
 

@@ -81,7 +81,11 @@ async function handleCarbVision(request, response) {
 async function handleLibre(request, response, url) {
   const pool = getDatabasePool();
   if (!pool) {
-    sendJson(response, 503, { error: "Database is not configured. SynchLibre needs the GlucoBot database." });
+    sendJson(response, 503, {
+      error: "SynchLibre needs the GlucoBot database.",
+      setup:
+        "In Render, sync the Blueprint or open glucobot > Environment and make sure DATABASE_URL is connected to glucobot-db."
+    });
     return;
   }
 
