@@ -433,9 +433,16 @@ async function fetchLibreReading({ email, password, patientId }) {
     lluVersion: process.env.LIBRE_LINKUP_VERSION ?? "4.16.0",
     cache: false
   });
-  await client.login();
-  const reading = await client.read();
-  return normalizeLibreReading(reading);
+  client.apiUrl = getLibreApiUrl();
+
+  try {
+    await client.login();
+    client.apiUrl = sanitizeLibreApiUrl(client.apiUrl);
+    const reading = await client.read();
+    return normalizeLibreReading(reading);
+  } catch (error) {
+    throw new Error(formatLibreError(error));
+  }
 }
 
 function normalizeLibreReading(reading) {
@@ -467,6 +474,26 @@ function mapLibreTrendToSensorTrend(trendType) {
   if (normalized.includes("doubledown") || normalized.includes("singledown")) return "Falling fast";
   if (normalized.includes("fortyfivedown")) return "Falling";
   return "Stable";
+}
+
+function getLibreApiUrl() {
+  return sanitizeLibreApiUrl(process.env.LIBRE_LINK_API_URL ?? "https://api-eu.libreview.io");
+}
+
+function sanitizeLibreApiUrl(value) {
+  return String(value || "https://api-eu.libreview.io").replace(/\/+$/, "");
+}
+
+function formatLibreError(error) {
+  const message = String(error?.message ?? error ?? "Libre Link Up sync failed.");
+  if (message.includes("Unexpected token '<'")) {
+    return [
+      "Libre Link Up returned an HTML page instead of glucose data.",
+      "This usually means the regional API host is wrong or Abbott redirected the request.",
+      "In Render, set LIBRE_LINK_API_URL to https://api-eu.libreview.io, save, redeploy, then try again."
+    ].join(" ");
+  }
+  return message;
 }
 
 function encryptSecret(value) {
