@@ -57,25 +57,28 @@ function render() {
     </header>
 
     <main>
-      <div class="app-tabs" role="tablist" aria-label="GlucoBot sections">
-        <button class="tab-button ${activeTab === "calculator" ? "active" : ""}" data-tab="calculator" role="tab" aria-selected="${activeTab === "calculator"}">
-          Calculator
-        </button>
-        <button class="tab-button ${activeTab === "carbVision" ? "active" : ""}" data-tab="carbVision" role="tab" aria-selected="${activeTab === "carbVision"}">
-          CarbScanner
-        </button>
-        <button class="tab-button ${activeTab === "log" ? "active" : ""}" data-tab="log" role="tab" aria-selected="${activeTab === "log"}">
-          Logbook
-        </button>
-        <button class="tab-button ${activeTab === "ratios" ? "active" : ""}" data-tab="ratios" role="tab" aria-selected="${activeTab === "ratios"}">
-          Ratios
-        </button>
-      </div>
       ${renderActiveTab()}
     </main>
+
+    <nav class="app-tabs" role="tablist" aria-label="GlucoBot sections">
+      ${renderTabButton("calculator", "Calculator", "./src/assets/tab-calculator.png")}
+      ${renderTabButton("carbVision", "CarbScanner", "./src/assets/tab-camera.png")}
+      ${renderTabButton("log", "Logbook", "./src/assets/tab-logbook.png")}
+      ${renderTabButton("ratios", "Ratios", "./src/assets/tab-ratios.png")}
+    </nav>
   `;
 
   bindEvents();
+}
+
+function renderTabButton(tab, label, icon) {
+  const isActive = activeTab === tab;
+  return `
+    <button class="tab-button ${isActive ? "active" : ""}" data-tab="${tab}" role="tab" aria-selected="${isActive}" aria-label="${label}">
+      <img src="${icon}" alt="" />
+      <span>${label}</span>
+    </button>
+  `;
 }
 
 function renderActiveTab() {
