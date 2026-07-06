@@ -1336,7 +1336,7 @@ textarea:focus,
 
   main {
     width: 100%;
-    padding: 14px 10px calc(108px + env(safe-area-inset-bottom));
+    padding: 14px 10px calc(102px + env(safe-area-inset-bottom));
   }
 
   h1 {
@@ -1359,13 +1359,17 @@ textarea:focus,
   }
 
   .app-tabs {
-    right: 10px;
-    bottom: max(10px, env(safe-area-inset-bottom));
-    left: 10px;
-    width: calc(100% - 20px);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 4px;
-    padding: 5px;
+    padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 18px 18px 0 0;
   }
 
   .tab-button {
