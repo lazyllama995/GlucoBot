@@ -446,7 +446,7 @@ async function fetchLibreReading({ email, password, patientId }) {
 }
 
 function normalizeLibreReading(reading) {
-  const timestamp = normalizeLibreTimestamp(reading?.timestamp);
+  const timestamp = normalizeLibreTimestamp(reading?._raw?.Timestamp ?? reading?.timestamp);
   const value = Math.round(Number(reading?.value));
   if (!Number.isFinite(value)) throw new Error("Libre did not return a glucose value.");
   const trendType = String(reading?.trendType ?? "");
@@ -462,9 +462,90 @@ function normalizeLibreReading(reading) {
 }
 
 function normalizeLibreTimestamp(value) {
+  if (typeof value === "string") {
+    const timestamp = parseLibreLocalTimestamp(value);
+    if (timestamp) return timestamp;
+  }
+
   const date = value instanceof Date ? value : new Date(value ?? Date.now());
   if (Number.isNaN(date.getTime())) return new Date().toISOString();
   return date.toISOString();
+}
+
+function parseLibreLocalTimestamp(value) {
+  const text = value.trim();
+  if (/[zZ]$|[+-]\d{2}:?\d{2}$/.test(text)) {
+    const date = new Date(text);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+
+  const isoMatch = text.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (isoMatch) {
+    return localTimeToUtcIso({
+      year: Number(isoMatch[1]),
+      month: Number(isoMatch[2]),
+      day: Number(isoMatch[3]),
+      hour: Number(isoMatch[4]),
+      minute: Number(isoMatch[5]),
+      second: Number(isoMatch[6] ?? 0)
+    });
+  }
+
+  const slashMatch = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})[ ,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
+  if (!slashMatch) return null;
+
+  const first = Number(slashMatch[1]);
+  const second = Number(slashMatch[2]);
+  const dateOrder =
+    first > 12 ? "dmy" : second > 12 ? "mdy" : String(process.env.LIBRE_DATE_ORDER ?? "mdy").toLowerCase();
+  let hour = Number(slashMatch[4]);
+  const meridiem = slashMatch[7]?.toUpperCase();
+  if (meridiem === "PM" && hour < 12) hour += 12;
+  if (meridiem === "AM" && hour === 12) hour = 0;
+
+  return localTimeToUtcIso({
+    year: Number(slashMatch[3]),
+    month: dateOrder === "dmy" ? second : first,
+    day: dateOrder === "dmy" ? first : second,
+    hour,
+    minute: Number(slashMatch[5]),
+    second: Number(slashMatch[6] ?? 0)
+  });
+}
+
+function localTimeToUtcIso({ year, month, day, hour, minute, second }) {
+  const timeZone = process.env.LIBRE_TIME_ZONE ?? "Europe/Madrid";
+  const target = Date.UTC(year, month - 1, day, hour, minute, second);
+  let utc = new Date(target);
+
+  for (let index = 0; index < 3; index += 1) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23"
+    })
+      .formatToParts(utc)
+      .reduce((values, part) => {
+        values[part.type] = part.value;
+        return values;
+      }, {});
+    const local = Date.UTC(
+      Number(parts.year),
+      Number(parts.month) - 1,
+      Number(parts.day),
+      Number(parts.hour),
+      Number(parts.minute),
+      Number(parts.second)
+    );
+    utc = new Date(utc.getTime() - (local - target));
+  }
+
+  return utc.toISOString();
 }
 
 function mapLibreTrendToSensorTrend(trendType) {

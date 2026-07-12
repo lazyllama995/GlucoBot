@@ -18,6 +18,8 @@ services:
         value: https://api-eu.libreview.io
       - key: LIBRE_LINKUP_VERSION
         value: 4.16.0
+      - key: LIBRE_TIME_ZONE
+        value: Europe/Madrid
       - key: GLUCOBOT_SECRET
         generateValue: true
 databases:
